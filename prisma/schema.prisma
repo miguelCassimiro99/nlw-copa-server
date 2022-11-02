@@ -16,11 +16,63 @@ datasource db {
 
 // Prisma deals represents Entities as 'Models'
 model Pool {
-  id        String   @id @default(cuid())
-  title     String
-  code      String   @unique
-  createdAt DateTime @default(now())
+  id          String       @id @default(cuid())
+  title       String
+  code        String       @unique
+  createdAt   DateTime     @default(now())
+  ownerId     String?
+  paricipants Paricipant[]
+
+  owner User? @relation(fields: [ownerId], references: [id])
 }
 
+model Paricipant {
+  id      String  @id @default(cuid())
+  guesses Guess[]
+  userId  String
+  poolId  String
+
+  user User? @relation(fields: [userId], references: [id])
+  pool Pool  @relation(fields: [poolId], references: [id])
+
+  // constrant key for performance
+  // if we search for a specific userId or poolId we'll have just one register
+  @@unique([userId, poolId])
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  avatarUrl String?
+  createdAt DateTime @default(now())
+
+  participatingAt Paricipant[]
+  ownPools        Pool[]
+}
+
+model Game {
+  id                    String   @id @default(cuid())
+  date                  DateTime
+  firstTeamCountryCode  String
+  secondTeamCountryCode String
+
+  guesses Guess[]
+}
+
+model Guess {
+  id               String   @id @default(cuid())
+  firstTeamPoints  Int
+  secondTeamPoints Int
+  createdAt        DateTime @default(now())
+  gameId           String
+  paricipantId     String
+
+  game       Game       @relation(fields: [gameId], references: [id])
+  paricipant Paricipant @relation(fields: [paricipantId], references: [id])
+}
+
+// init prisma (create dir and files): npx prisma init --datasource-provider "data_source"
+// "data_source" can be SQLite or Postgres or MySQL (Default: Postgres)
 // command: npx prisma migrate dev
 // to see the db on browser: npx prisma studio
