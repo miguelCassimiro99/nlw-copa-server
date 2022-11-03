@@ -35,7 +35,8 @@ async function bootstrap() {
   })
 
   fastify.post('/pools', async (request, reply) => {
-    //? lib for schema validation
+    //? lib for schema validation: Zod
+    //? Includes types
     const createPoolBody = z.object({
       title: z.string(),
     })
